@@ -1,5 +1,5 @@
-#Applying ICT in a clinical environment assignment part 3
-#By Rebecca Sadler and Natalie Card
+# Applying ICT in a clinical environment assignment part 3
+
 from scipy.optimize import minimize, basinhopping, brute, differential_evolution
 from scipy.ndimage import interpolation
 import matplotlib.pyplot as plt
@@ -25,39 +25,42 @@ Image4 = dicom.read_file("IMG-0004-00004.dcm").pixel_array
 
 # Now visualise one of the images to make sure it loaded okay
 # Hint: this is just a quick check, should be doable in 2 lines!
-#plt.imshow(patientImage4)#tested to check that all the images load correctly
-#plt.show()
+# plt.imshow(patientImage4)  # tested to check that all the images load correctly
+# plt.show()
 
 # Step 2: Modify your code from yesterday to enable automatic registration
 # Hint: copy your shiftImages() function here, then tweak it to return a cost
 # The shiftImages function
-#fig = plt.figure()
-#ax = fig.add_subplot(111)
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
 
-#ax.imshow(Image1,alpha=1, cmap="Greens_r") #green in colour
-#floating = ax.imshow(Image2, alpha=0.5, cmap="Purples_r") #purple colour
-#floating = ax.imshow(Image3, alpha=0.5, cmap="Blues_r") #blue colour
-#floating = ax.imshow(Image4, alpha=0.5, cmap="Oranges_r") #orange colour
-#plt.show()
+# ax.imshow(Image1,alpha=1, cmap="Greens_r") #green in colour
+# floating = ax.imshow(Image2, alpha=0.5, cmap="Purples_r") #purple colour
+# floating = ax.imshow(Image3, alpha=0.5, cmap="Blues_r") #blue colour
+# floating = ax.imshow(Image4, alpha=0.5, cmap="Oranges_r") #orange colour
+# plt.show()
 
-#Cost function
+
+# Task 1: Score the accuracy of the alignment with a cost function
 def costFunction(Image1, Image2):
     return np.mean((Image1 - Image2)**2)
 
-#Shift function
+
+# Shift function
 def shiftImages(shift, image):
     global Image1
     global Image2
     global Image3
     global Image4
     Image_temp = interpolation.shift(image, shift, mode="nearest")
-    #floating.set_data(Image_temp)
-    #fig.canvas.draw()
+    # floating.set_data(Image_temp)
+    # fig.canvas.draw()
     cost = costFunction(Image1, Image_temp)
-    #ax.set_title("Cost = {}".format(cost))
-    #plt.pause(0.001)
+    # ax.set_title("Cost = {}".format(cost))
+    # plt.pause(0.001)
     return cost
-#shiftImages([-25,-50])
+# shiftImages([-25,-50])
+
 
 def shiftImages2(shift, image):
     global Image1
@@ -71,10 +74,10 @@ def shiftImages2(shift, image):
     ax.set_title("Cost = {}".format(cost))
     return Image_temp
 
-#plt.show()
+# plt.show()
 
-#Rotate function
-#def rotateImages(rotates):
+# Rotate function
+# def rotateImages(rotates):
 #    global Image2
 #    Image2_temp = rotate(Image2, rotates, reshape=False)
 #    floating.set_data(Image2_temp)
@@ -89,31 +92,37 @@ def shiftImages2(shift, image):
 # Hint: the brute force optimiser takes parameter limits in a tuple of tuples
 # documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brute.html
 
-#Brute force optimisation
-#res = brute(shiftImages, ((-100, 100),(-100, 100)), (Image2,))
-#print(res)
+# Brute force optimisation
+# res = brute(shiftImages, ((-100, 100),(-100, 100)), (Image2,))
+# print(res)
 
+# Task 2: Modify the code to allow automatic registration
 # Step 4: The automatic registration will return a shift that it thinks best registers the images.
 # Use your shift function to apply the registration, then visualise the result on a
 # green/purple plot. Does it look okay?
 # Hint: re-use some of the code from yesterday
 
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.imshow(Image1,alpha=1, cmap="Greens_r") #green in colour
-floating = ax.imshow(Image2, alpha=0.5, cmap="Purples_r") #purple colour
+ax.imshow(Image1,alpha=1, cmap="Greens_r")  # green in colour
+floating = ax.imshow(Image2, alpha=0.5, cmap="Purples_r")  # purple colour
+
 
 def registerImages(Image1st, Image2nd):
     global res
     res = brute(shiftImages, ((-100, 100),(-100, 100)), (Image2nd,))
-    print (res)
-	
+    print(res)
+
+
 registerImages(Image1, Image2)
 shiftImages2(res, Image2)
 
 plt.show()
     
 exit()
+
+# Task 3: Use the auto-registration code to align a set of images
 # Step 5: Below is some code to implement a clipbox you can use to select the region of
 # image that contains the tumour for further analysis. You need to link up the event
 # handlers with the right events so it will work
@@ -123,20 +132,21 @@ import matplotlib.patches as patches
 
 # Create a new figure
 fig2 = plt.figure(2)
-ax = fig2.add_subplot(111)# Stick a subplot into the figure
-thePlot = ax.imshow(lungs_1, cmap="Greys_r") # Display the fixed image (your image name may be different)
+ax = fig2.add_subplot(111)  # Stick a subplot into the figure
+thePlot = ax.imshow(lungs_1, cmap="Greys_r")  # Display the fixed image (your image name may be different)
 
 # Start with a box drawn in the centre of the image
 origin = (lungs_1.shape[0]/2, lungs_1.shape[1]/2)
 rectParams = [origin[0], origin[1], 10, 10]
 # Draw a rectangle in the image
 # Question: why are x and y the other way round here?
-rect = patches.Rectangle((rectParams[1], rectParams[0]),rectParams[2], rectParams[3], linewidth=2, edgecolor='r',facecolor='none')
+rect = patches.Rectangle((rectParams[1], rectParams[0]), rectParams[2], rectParams[3], linewidth=2, edgecolor='r', facecolor='none')
 
 ax.add_patch(rect)
 
 global initPos
 initPos = None
+
 
 # Event handlers for the clipbox
 def onPress(event):
@@ -144,13 +154,14 @@ def onPress(event):
     This function is called when you press a mouse button inside the figure window
     """
     if event.inaxes == None:
-        return# Ignore clicks outside the axes
+        return  # Ignore clicks outside the axes
     contains, attr = rect.contains(event)
     if not contains:
-        return# Ignore clicks outside the rectangle
+        return  # Ignore clicks outside the rectangle
 
     global initPos # Grab the global variable to update it
     initPos = [rect.get_x(), rect.get_y(), event.xdata, event.ydata]
+
 
 def onMove(event):
     """
@@ -158,20 +169,21 @@ def onMove(event):
     """
     global initPos
     if initPos is None:
-        return# If you haven't clicked recently, we ignore the event
+        return  # If you haven't clicked recently, we ignore the event
 
     if event.inaxes == None:
-        return# ignore movement outside the axes
+        return  # ignore movement outside the axes
 
     x = initPos[2]
     y = initPos[3]
     dx = event.xdata - initPos[2]
     dy = event.ydata - initPos[3]
-                                    # This code does the actual move of the rectangle
+    # This code does the actual move of the rectangle
     rect.set_x(initPos[0] + dx)
     rect.set_y(initPos[1] + dy)
 
     rect.figure.canvas.draw()
+
 
 def onRelease(event):
     """
@@ -179,6 +191,7 @@ def onRelease(event):
     """
     global initPos
     initPos = None # Reset the position ready for next click
+
 
 def keyboardInterface(event):
     """
@@ -220,7 +233,8 @@ def keyboardInterface(event):
         h0 = rect.get_height()
         rect.set_height(h0 + 10)
 
-    rect.figure.canvas.draw()# update the plot window
+    rect.figure.canvas.draw()  # update the plot window
+
 
 # These need connecting to the right functions
 cid1 = fig2.canvas.mpl_connect('button_press_event', )
@@ -233,8 +247,10 @@ plt.show()
 indices = [int(rect.get_y()), int(rect.get_y() + rect.get_height()), int(rect.get_x()), int(rect.get_x() + rect.get_width())]
 print(indices)
 exit()
+
+# Further steps
 # Step 6: You should now have all four images registered in the same location, and a set of image indices
-# that crop out just the region you're interested in. Use image processing tecniques to extract
+# that crop out just the region you're interested in. Use image processing techniques to extract
 # the volume of thr tumour in each image
 # Hint: Start by extracting the volume in just the first image
 # Hint: Any technique you think will work is fair game!
